@@ -4,7 +4,9 @@ library(readr)
 library(rvest)
 library(stringr)
 
-data_url <- "https://raw.githubusercontent.com/YOUR_USER/YOUR_REPO/main/data.csv"
+Sys.setenv(LANG = "en")
+
+data_url <- "https://raw.githubusercontent.com/Disco-Dip/SPI-Birds_repo_update/main/data.csv"
 
 scrape_n_datasets <- function() {
   tryCatch({
@@ -17,16 +19,29 @@ scrape_n_datasets <- function() {
 }
 
 ui <- fluidPage(
-  "SPI-Birds Repository population",
-  plotOutput("plot", width = "100%")
+  tags$head(tags$style(HTML("
+    body { font-size: 20px; }
+    .centered { max-width: 900px; margin: 0 auto; text-align: center; }
+    .centered h1 { font-size: 40px; }
+  "))),
+  
+  div(class = "centered",
+      h1("SPI-Birds Repository metadata and dataset population"),
+      plotOutput("plot", width = "100%", height = "500px")
+  )
 )
 
 server <- function(input, output, session) {
   
   # stored history (cached per session)
   history <- reactive({
-    read_csv(data_url, show_col_types = FALSE) |>
-      transform(type = "stored")
+    read_csv(
+      data_url,
+      col_types = cols(
+        datasets = col_integer(),
+        date = col_date(format = "%d-%m-%Y")
+      )
+    )
   })
   
   # live value, scraped once per visit, never saved
@@ -35,8 +50,7 @@ server <- function(input, output, session) {
     if (is.na(n)) return(NULL)
     data.frame(
       datasets = n,
-      date = as.Date(format(Sys.time(), "%Y-%m-%d", tz = "Europe/Amsterdam")),
-      type = "live"
+      date = as.Date(format(Sys.time(), "%Y-%m-%d", tz = "Europe/Amsterdam"))
     )
   })
   
@@ -47,14 +61,18 @@ server <- function(input, output, session) {
       dat <- rbind(dat[dat$date != lv$date, ], lv)
     }
     
-    ggplot(dat, aes(x = date, y = datasets)) +
-      geom_line() +
-      geom_point(aes(colour = type), size = 2) +
-      scale_colour_manual(values = c(stored = "black", live = "steelblue"),
-                          name = NULL) +
-      geom_hline(yintercept = 186, col = "red") +
+    ggplot() +
+      geom_line(data = dat, aes(x = date, y = datasets), col = "#004A83") +
+      scale_x_date(date_labels = "%d-%m") +
+      geom_hline(yintercept = 180, col = "#91191C") +
+      annotate("text",
+               x = min(dat$date), y = 180,
+               label = "Target: migrate 180 SPI-Birds (metadata) datasets",
+               hjust = 0, vjust = -0.5,
+               colour = "#91191C", size = 5) +
       theme_classic()
   })
 }
 
 shinyApp(ui, server)
+
