@@ -4,8 +4,6 @@ library(readr)
 library(rvest)
 library(stringr)
 
-Sys.setenv(LANG = "en")
-
 data_url <- "https://raw.githubusercontent.com/Disco-Dip/SPI-Birds_repo_update/main/data.csv"
 
 scrape_n_datasets <- function() {
@@ -44,12 +42,14 @@ server <- function(input, output, session) {
     )
   })
   
+  # retrieve current number of datasets
+  n <- reactive({n <- scrape_n_datasets()}) 
+  
   # live value, scraped once per visit, never saved
   live <- reactive({
-    n <- scrape_n_datasets()
-    if (is.na(n)) return(NULL)
+    if (is.na(n())) return(NULL)
     data.frame(
-      datasets = n,
+      datasets = n(),
       date = as.Date(format(Sys.time(), "%Y-%m-%d", tz = "Europe/Amsterdam"))
     )
   })
@@ -70,6 +70,11 @@ server <- function(input, output, session) {
                label = "Target: migrate 180 SPI-Birds (metadata) datasets",
                hjust = 0, vjust = -0.5,
                colour = "#91191C", size = 5) +
+      annotate("text",
+               x = max(dat$date), y = n(),
+               label = paste(n(), "datasets migrated"),
+               hjust = 1, vjust = -0.5,
+               colour = "#004A83", size = 5) +
       theme_classic()
   })
 }
