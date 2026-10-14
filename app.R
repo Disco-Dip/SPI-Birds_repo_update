@@ -37,7 +37,7 @@ server <- function(input, output, session) {
       data_url,
       col_types = cols(
         datasets = col_integer(),
-        date = col_date(format = "%d-%m-%Y")
+        date = col_date(format = "%Y-%m-%d")
       )
     )
   })
