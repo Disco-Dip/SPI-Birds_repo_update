@@ -15,7 +15,7 @@ stopifnot(length(n_datasets) == 1, !is.na(n_datasets))
 
 new_row <- data.frame(
   datasets = n_datasets,
-  date = as.Date(format(now_ams, "%Y-%m-%d"))
+  date = as.Date(format(now_ams, "%d-%m-%Y"))
 )
 
 if (file.exists("data.csv")) {
