@@ -1,7 +1,7 @@
 name: daily-scrape
 on:
   schedule:
-    - cron: "10 07 * * *"  
+    - cron: "10 02 * * *"  
   workflow_dispatch:
 
 permissions:
