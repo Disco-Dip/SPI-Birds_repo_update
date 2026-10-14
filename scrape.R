@@ -3,13 +3,6 @@ library(stringr)
 
 now_ams <- as.POSIXlt(Sys.time(), tz = "Europe/Amsterdam")
 
-# On scheduled runs, only continue if it's actually 23:xx in Amsterdam.
-# Manual runs (workflow_dispatch) always go through.
-if (Sys.getenv("GITHUB_EVENT_NAME") == "schedule" && now_ams$hour != 23) {
-  message("Not 23:xx in Amsterdam, skipping.")
-  quit(save = "no", status = 0)
-}
-
 page <- read_html("https://repository.spibirds.org/")
 
 n_datasets <- page |>
