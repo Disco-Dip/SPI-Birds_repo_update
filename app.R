@@ -3,6 +3,7 @@ library(ggplot2)
 library(readr)
 library(rvest)
 library(stringr)
+library(tidyverse)
 
 data_url <- "https://raw.githubusercontent.com/Disco-Dip/SPI-Birds_repo_update/main/data.csv"
 
@@ -33,13 +34,11 @@ server <- function(input, output, session) {
   
   # stored history (cached per session)
   history <- reactive({
-    read_csv(
-      data_url,
-      col_types = cols(
-        datasets = col_integer(),
-        date = col_date(format = "%Y-%m-%d")
+    read_csv(data_url, col_types = cols(.default = col_character())) |>
+      mutate(
+        datasets = as.integer(datasets),
+        date = as.Date(date, format = "%Y-%m-%d")
       )
-    )
   })
   
   # retrieve current number of datasets
